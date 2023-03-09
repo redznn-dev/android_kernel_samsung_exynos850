@@ -471,26 +471,6 @@ static void cpufreq_interactive_update(struct interactive_cpu *icpu)
 	slack_timer_resched(icpu, smp_processor_id(), true);
 }
 
-static void cpufreq_interactive_idle_end(void)
-{
-	struct interactive_cpu *icpu = &per_cpu(interactive_cpu,
-						smp_processor_id());
-
-	if (!down_read_trylock(&icpu->enable_sem))
-		return;
-
-	if (icpu->ipolicy) {
-		/*
-		 * We haven't sampled load for more than sampling_rate time, do
-		 * it right now.
-		 */
-		if (time_after_eq(jiffies, icpu->next_sample_jiffies))
-			cpufreq_interactive_update(icpu);
-	}
-
-	up_read(&icpu->enable_sem);
-}
-
 static void cpufreq_interactive_get_policy_info(struct cpufreq_policy *policy,
 						unsigned int *pmax_freq,
 						u64 *phvt, u64 *pfvt)
